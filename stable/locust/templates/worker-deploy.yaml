@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "locust.worker" . }}
@@ -7,7 +7,7 @@ metadata:
     release: {{ .Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     app: {{ template "locust.fullname" . }}
-    component: worker
+    component: "worker"
 spec:
   replicas: {{ default 2 .Values.worker.replicaCount }}
   strategy:
@@ -15,11 +15,15 @@ spec:
     rollingUpdate:
       maxSurge: {{ default 1 .Values.worker.maxSurge }}
       maxUnavailable: {{ default 1 .Values.worker.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ template "locust.fullname" . }}
+      component: "worker"
   template:
     metadata:
       labels:
         app: {{ template "locust.fullname" . }}
-        component: worker
+        component: "worker"
     spec:
     {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
